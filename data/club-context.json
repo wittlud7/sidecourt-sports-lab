@@ -1,0 +1,10 @@
+{
+  "verifiedAt": "2026-10-22",
+  "entries": [
+    {"sport":"basketball","teamId":"13","name":"Los Angeles Lakers","staff":[{"name":"Rob Pelinka","zhName":"罗勃·佩林卡","role":"篮球运营总裁兼总经理","publishedAt":"2025-04-18","source":"https://www.nba.com/lakers/news/los-angeles-lakers-extend-agreement-with-rob-pelinka-041825","sourceTitle":"湖人官方续约及职务公告"}]},
+    {"sport":"basketball","teamId":"9","name":"Golden State Warriors","staff":[{"name":"Mike Dunleavy Jr.","zhName":"小迈克·邓利维","role":"总经理","publishedAt":"2023-06-20","source":"https://www.nba.com/team/1610612744/warriors","sourceTitle":"NBA 官方勇士球队资料页"}]},
+    {"sport":"soccer","teamId":"86","name":"Real Madrid","staff":[{"name":"Florentino Pérez","zhName":"弗洛伦蒂诺·佩雷斯","role":"俱乐部主席","publishedAt":"2026-06-11","source":"https://www.realmadrid.com/en-US/news/club/latest-news/florentino-perez-proclamado-presidente-11-06-2026","sourceTitle":"皇马官方主席任期公告"}]},
+    {"sport":"soccer","teamId":"83","name":"Barcelona","staff":[{"name":"Joan Laporta","zhName":"胡安·拉波尔塔","role":"俱乐部主席","publishedAt":"2026-07-01","source":"https://www.fcbarcelona.com/en/news/4529324/new-fc-barcelona-board-of-directors-unveiled","sourceTitle":"巴塞罗那新董事会公告"},{"name":"Deco","zhName":"德科","role":"足球体育总监","publishedAt":"2023-09-13","source":"https://www.fcbarcelona.com/en/club/news/3681220/fc-barcelona-presents-new-corporate-structure-for-sport","sourceTitle":"巴塞罗那官方体育架构公告"}]},
+    {"sport":"soccer","teamId":"382","name":"Manchester City","staff":[{"name":"Hugo Viana","zhName":"雨果·维亚纳","role":"足球总监","publishedAt":"2026-09-16","source":"https://www.mancity.com/citytv/mens/hugo-viana-transfer-window-interview-part-two-2026-63925181","sourceTitle":"曼城官方 2026/27 转会窗专访"}]}
+  ]
+}

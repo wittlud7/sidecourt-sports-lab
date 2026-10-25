@@ -1,0 +1,16 @@
+import type {DataResult} from './sports';
+const pending=new Map<string,Promise<any>>();
+function cacheResponse(key:string,data:any){try{const value=JSON.stringify(data);if(value.length>500000)return;const cached=Object.keys(localStorage).filter(k=>k.startsWith('sc:data:')&&k!==key).map(k=>{const v=localStorage.getItem(k)||'';let time=0;try{time=new Date(JSON.parse(v).fetchedAt).getTime()||0;}catch{}return {key:k,size:v.length,time};}).sort((a,b)=>a.time-b.time);let size=value.length+cached.reduce((n,r)=>n+r.size,0);while(cached.length&&(size>1000000||cached.length>=50)){const first=cached.shift()!;localStorage.removeItem(first.key);size-=first.size;}try{localStorage.setItem(key,value);}catch{for(const item of cached)localStorage.removeItem(item.key);try{localStorage.setItem(key,value);}catch{}}}catch{}}
+
+export async function sports<T=any>(league:string,kind:string,params:Record<string,string>={},refresh=false):Promise<DataResult<T>>{
+ const q=new URLSearchParams({league,kind,...params}),key='sc:data:'+q;
+ if(!refresh&&pending.has(key))return pending.get(key)!;
+ const promise=(async()=>{try{const r=await fetch('/api/sports?'+q,{signal:AbortSignal.timeout(24000),cache:refresh?'reload':'default'});const d:any=await r.json();if(!r.ok)throw new Error(d.error||'数据加载失败');cacheResponse(key,d);return d;}catch(e){try{const old=localStorage.getItem(key);if(old)return {...JSON.parse(old),stale:true,error:'连接暂不可用，显示本机历史缓存'};}catch{}throw e;}})();
+ pending.set(key,promise);try{return await promise;}finally{pending.delete(key);}
+}
+export function download(name:string,content:string,type='text/plain;charset=utf-8'){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+export function csv(rows:(string|number|undefined)[][]){return '\ufeff'+rows.map(r=>r.map(v=>{let s=String(v??'');if(/^[=+@\-]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}).join(',')).join('\r\n');}
+export function getStored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
+export function putStored(key:string,value:any){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch{return false;}}
+export const STAT_NAMES:Record<string,string>={wins:'胜场',draws:'平场',losses:'负场',goalDifference:'净胜球',avgGoals:'场均进球',avgGoalsConceded:'场均失球',goalsConceded:'失球',threePointFieldGoalPct:'三分命中率 %',gamesPlayed:'出场',playerTimes:'出场',avgPoints:'场均得分',points:'场均得分',avgRebounds:'场均篮板',rebounds:'场均篮板',avgAssists:'场均助攻',assists:'场均助攻',avgSteals:'场均抢断',steals:'场均抢断',avgBlocks:'场均盖帽',blocked:'场均盖帽',avgMinutes:'场均分钟',minutes:'场均分钟',avgTurnovers:'场均失误',turnovers:'场均失误',fieldGoalPct:'投篮命中率 %',fieldGoalsPercentage:'投篮命中率 %',threePointPct:'三分命中率 %',threePointPercentage:'三分命中率 %',freeThrowPct:'罚球命中率 %',freeThrowsPercentage:'罚球命中率 %',totalGoals:'进球',goalAssists:'助攻',appearances:'出场',totalShots:'射门',shotsOnTarget:'射正',offsides:'越位',foulsCommitted:'犯规',yellowCards:'黄牌',redCards:'红牌',saves:'扑救',cleanSheets:'零封',minutesPlayed:'比赛分钟',starts:'首发',subIns:'替补登场',totalAssists:'助攻'};
+export function statValue(stats:Record<string,number>,aliases:string[]){for(const k of aliases)if(Number.isFinite(stats[k]))return stats[k];return undefined;}

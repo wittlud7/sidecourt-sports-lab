@@ -1,0 +1,13 @@
+'use client';
+import {useState} from 'react';
+import {cn,type Match} from '@/lib/sports';
+import {makePlay} from '@/lib/tactics.mjs';
+import TacticalStudio from './tactical-studio';
+export default function TacticalReview({raw,match,league}:{raw:any;match:Match;league:string}){
+ const sport=['nba','cba'].includes(league)?'basketball':'soccer',rosters=raw?.rosters?.length?raw.rosters:raw?.boxscore?.players||[],getRoster=(id:string)=>{const r=rosters.find((r:any)=>String(r.team?.id)===id),rows=r?.roster||r?.statistics?.[0]?.athletes||[];return rows.filter((p:any)=>p.starter).map((p:any)=>({name:cn(p.athlete?.displayName||''),jersey:p.jersey||p.athlete?.jersey,position:p.position?.abbreviation||p.athlete?.position?.abbreviation}));},home=getRoster(match.home.id),away=getRoster(match.away.id);
+ const events=(raw?.plays?.length?raw.plays:raw?.keyEvents||[]).filter((p:any)=>p.text||p.shortText||p.type?.text).slice(0,1000),[event,setEvent]=useState(''),[revision,setRevision]=useState(0),[initial,setInitial]=useState<any>(null),[status,setStatus]=useState('');
+ function create(){const e=event!==''?events[Number(event)]:null,p:any=makePlay(sport,undefined,home,away),clock=e?.clock?.displayValue||e?.time?.displayValue||'',description=e?.text||e?.shortText||e?.type?.text||'';p.title=`${cn(match.home.name)} · 战术复盘`;p.origin='event';p.context=`${cn(match.away.name)} vs ${cn(match.home.name)} · ${match.date.slice(0,10)}。${e?`来源事件 ${clock}：${description}`:'尚未选取事件。'} 球员来自已公布首发；未提供的姓名以主/客编号表示。所有站位与跑动由预设或你手工编排，不代表本场真实轨迹。`;
+ // Never stitch unrelated shot locations into a fabricated movement sequence.
+ p.frames[0].note=e?`事件依据：${clock} ${description}。请结合录像手动标注触发点、持球选择与防守响应。`:'请结合比赛录像设置关键帧，再记录判断依据。';setInitial(p);setRevision(n=>n+1);setStatus('已建立新的事件示意。此前工作区草稿已被替换；需要保留的版本请先保存到战术库。');}
+ return <div className="stack"><div className="notice">事件文字来自本场公开数据；这些来源没有完整的球员位置追踪。下方用于对照录像编排战术示意，不能作为真实跑动证据。出手位置请查看独立的「投篮地图」。</div><div className="toolbar"><select aria-label="复盘事件" value={event} onChange={e=>setEvent(e.target.value)}><option value="">选择本场事件作为讲解依据</option>{events.map((e:any,i:number)=><option key={i} value={i}>{e.clock?.displayValue||e.time?.displayValue||''} {(e.text||e.shortText||e.type?.text).slice(0,160)}</option>)}</select><button className="btn primary" onClick={create}>据此新建战术示意</button></div>{!events.length&&<p className="tiny muted">本场详情暂未提供可用事件。可结合原始比赛页面或自备录像，手动编排。</p>}<p className="tiny muted" role="status">{status}</p><TacticalStudio key={match.id+':'+revision} sport={sport} home={home} away={away} initial={initial} persistKey={'match-'+league+'-'+match.id}/></div>;
+}

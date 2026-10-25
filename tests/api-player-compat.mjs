@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+const origin=process.env.SIDECOURT_TEST_ORIGIN||'http://127.0.0.1:8787';
+async function read(league,kind,params){const r=await fetch(origin+'/api/sports?'+new URLSearchParams({league,kind,...params}),{signal:AbortSignal.timeout(40000)}),d=await r.json();assert.equal(r.status,200,JSON.stringify(d).slice(0,500));assert.ok(d.source&&d.fetchedAt);return d;}
+const history={athlete:'3078576',team:'2',season:'2024'};
+const log=await read('nba','gamelog',history);assert.ok(log.data.rows.length>0);assert.ok(log.data.rows.every(r=>Number.isFinite(new Date(r.date).getTime())&&new Date(r.date).getFullYear()<=2024));console.log('PASS NBA arbitrary-player historical recent sample',log.data.rows.length,log.fallback?'compatibility path':'direct source');
+const overview=await read('nba','athlete',history);assert.ok(overview.data.statistics?.names?.includes('avgPoints'));if(overview.fallback&&!overview.snapshotAt)assert.match(overview.data.statScope,/非全赛季/);console.log('PASS NBA individual overview keeps sample/full-season scope',overview.data.statScope||'provider statistics');
+const schedule=await read('eng.1','schedule',{team:'382'}),last=schedule.data.filter(m=>m.state==='post').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];assert.ok(last);const detail=await read('eng.1','summary',{event:last.id}),roster=detail.data.rosters.find(r=>String(r.team.id)==='382'),p=roster.roster.find(p=>p.starter);assert.ok(p);
+const profile=await read('eng.1','profile',{athlete:String(p.athlete.id),team:'382'});assert.equal(profile.data.id,String(p.athlete.id));console.log('PASS live football profile',profile.data.name);
+const soccer=await read('eng.1','gamelog',{athlete:String(p.athlete.id),team:'382'});assert.ok(soccer.data.rows.length>0);const resolved=soccer.data.filters?.find(f=>f.name==='league');assert.equal(resolved?.value,'eng.1');console.log('PASS football recent games stay in selected league',soccer.data.rows.length);
