@@ -34,12 +34,15 @@ npm run dev
 npm test               # 离线测试
 npm run typecheck      # TypeScript 检查
 npm run build          # 生产构建
+npm run check:bundle   # 首屏依赖与体积预算
 npm start              # 生产预览，地址以终端输出为准
 ```
 
 Windows 下若 npm 命令 shim 异常，可以用 `npm.cmd`，或直接执行 `node scripts/run-framework.mjs dev`。
 
 GitHub Actions 在推送和 PR 时执行安装、测试、类型检查与构建。联网数据检查独立运行：先启动开发服务，再执行 `node tests/api-smoke.mjs`、`node tests/api-v2-smoke.mjs`。可通过 `SIDECOURT_TEST_ORIGIN` 指向其他预览地址。
+
+模块与历史档案按需加载，性能测量和预算见 [性能说明](docs/performance.md)。
 
 ## 数据与模拟
 
